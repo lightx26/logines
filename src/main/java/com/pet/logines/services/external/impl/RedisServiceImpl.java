@@ -13,18 +13,40 @@ public class RedisServiceImpl implements RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // Lưu dữ liệu dạng String
+    @Override
     public void set(String key, String value) {
         redisTemplate.opsForValue().set(key, value);
     }
 
+    @Override
     public void set(String key, String value, long timeout) {
         redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
     }
 
-    // Lấy dữ liệu dạng String
+    @Override
+    public void increment(String key) {
+        redisTemplate.opsForValue().increment(key);
+    }
+
+    @Override
+    public void increment(String key, long timeout) {
+        redisTemplate.opsForValue().increment(key);
+        redisTemplate.expire(key, timeout, TimeUnit.SECONDS);
+    }
+
+    @Override
     public String get(String key) {
         return (String) redisTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public <T> T get(String key, Class<T> clazz) {
+        return (T) redisTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public Long getExpire(String key) {
+        return redisTemplate.getExpire(key);
     }
 
 //    // Lưu dữ liệu dạng Hash
@@ -37,7 +59,7 @@ public class RedisServiceImpl implements RedisService {
 //        return redisTemplate.opsForHash().get(key, hashKey);
 //    }
 
-    // Xóa một key khỏi Redis
+    @Override
     public void delete(String key) {
         redisTemplate.delete(key);
     }

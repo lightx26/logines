@@ -33,7 +33,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers(
                         "auth/register",
-                        "auth/verify-phone"
+                        "auth/verify",
+                        "auth/resend"
                     )
                     .permitAll();
                     authorize.anyRequest().authenticated();
