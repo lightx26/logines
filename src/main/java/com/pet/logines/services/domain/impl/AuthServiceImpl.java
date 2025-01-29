@@ -1,5 +1,9 @@
 package com.pet.logines.services.domain.impl;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.pet.logines.configurations.properties.GoogleOAuthConfig;
 import com.pet.logines.dtos.requests.PhoneLoginParams;
 import com.pet.logines.dtos.responses.auth.RegisterResponse;
 import com.pet.logines.models.entities.PhoneLogin;
@@ -16,8 +20,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -35,6 +43,8 @@ public class AuthServiceImpl implements AuthService {
     private final String OTP_PREFIX = "OTP::";
     private final String OTP_COUNT_PREFIX = "OTP_COUNT::";
     private final int OTP_MAX_COUNT = 3;
+
+    private final GoogleOAuthConfig googleOAuthConfig;
 
     @Override
     public RegisterResponse registerWithPhone(@NonNull PhoneLoginParams params) {
@@ -125,5 +135,24 @@ public class AuthServiceImpl implements AuthService {
         }
 
         sendOtp(phoneLogin.getPhoneNumber());
+    }
+
+    @Override
+    public String googleLogin(String token) {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList(googleOAuthConfig.getClientId()))
+                .build();
+
+        try {
+            GoogleIdToken idToken = verifier.verify(token);
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+                return "Authenticated as " + payload.getEmail();
+            } else {
+                return "Invalid token";
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            throw new RuntimeException("Error verifying Google token");
+        }
     }
 }

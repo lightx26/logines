@@ -1,5 +1,6 @@
 package com.pet.logines.controllers;
 
+import com.pet.logines.dtos.requests.GoogleLoginParams;
 import com.pet.logines.dtos.requests.PhoneLoginParams;
 import com.pet.logines.dtos.requests.ResendOtpParams;
 import com.pet.logines.dtos.requests.VerifyPhoneParams;
@@ -36,5 +37,12 @@ public class AuthController {
     public ResponseEntity<?> resend(@RequestBody @Valid ResendOtpParams resendOtpParams) {
         authService.resendOTP(resendOtpParams.getUserId());
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@RequestBody @Valid GoogleLoginParams googleLoginParams) {
+        return ResponseEntity.ok().body(
+                authService.googleLogin(googleLoginParams.getIdToken())
+        );
     }
 }

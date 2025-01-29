@@ -7,4 +7,5 @@ public interface AuthService {
     RegisterResponse registerWithPhone(PhoneLoginParams params);
     void verifyOTP(Long userId, String otp);
     void resendOTP(Long userId);
+    String googleLogin(String idToken);
 }
